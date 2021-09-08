@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"os"
+	"start-zoom-cui/model"
 )
 
 type Option struct {
@@ -37,5 +38,9 @@ func main() {
 	} else if len(opts.Setting) != 0 {
 		fmt.Println("Setting")
 		// 設定変更機能
+	} else {
+		model.CreateUser("tst")
+		flags.NewParser(&opts, flags.Default).WriteHelp(os.Stdout)
+		os.Exit(0)
 	}
 }
