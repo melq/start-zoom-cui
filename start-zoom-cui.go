@@ -39,7 +39,7 @@ func main() {
 		fmt.Println("Setting")
 		// 設定変更機能
 	} else {
-		model.CreateUser("tst")
+		model.CreateUser("teest")
 		flags.NewParser(&opts, flags.Default).WriteHelp(os.Stdout)
 		os.Exit(0)
 	}
