@@ -18,7 +18,7 @@ func CreateUser(name string) {
 		}
 	} (db)
 
-	var schema = "CREATE TABLE " + name + // ユーザ毎のテーブルを作成するクエリ
+	var schema = "CREATE TABLE IF NOT EXISTS" + name + // ユーザ毎のテーブルを作成するクエリ
 		"(id int not null primary key auto_increment," +
 		" dispose bit not null," +
 		" meet_name varchar(32) not null," +
