@@ -16,16 +16,20 @@ func CreateUser(name string) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-	}(db)
+	} (db)
 
 	var schema = "CREATE TABLE " + name + // ユーザ毎のテーブルを作成するクエリ
 		"(id int not null primary key auto_increment," +
-		" meet_name varchar(32)," +
-		" url varchar(256))"
+		" dispose bit not null," +
+		" meet_name varchar(32) not null," +
+		" url varchar(256) not null," +
+		" day_of_week enum('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday')," +
+		" meet_date date," +
+		" meet_time time)"
 
 	tx := db.MustBegin()
 	tx.MustExec("INSERT INTO users (name) VALUES (?)", name)
-	tx.MustExec(schema)
+	log.Println(tx.MustExec(schema))
 	err = tx.Commit()
 	if err != nil {
 		log.Fatalln(err)
