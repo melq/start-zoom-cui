@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"os"
-	"start-zoom-cui/model"
+	"start-zoom-cui/repository"
 )
 
 type Option struct {
-	Start []bool `short:"s" long:"start" description:"近い会議を開始します"`
-	Register []bool `short:"r" long:"register" description:"会議の予定を作成します"`
-	List []bool `short:"l" long:"list" description:"登録されている会議の一覧を表示します"`
-	Edit []bool `short:"e" long:"edit" description:"登録されている会議の編集・削除を行います"`
-	Setting []bool `long:"setting" description:"設定を行います"`
+	Start bool `short:"s" long:"start" description:"近い会議を開始します"`
+	Register bool `short:"r" long:"register" description:"会議の予定を作成します"`
+	List bool `short:"l" long:"list" description:"登録されている会議の一覧を表示します"`
+	Edit bool `short:"e" long:"edit" description:"登録されている会議の編集・削除を行います"`
+	Setting bool `long:"setting" description:"設定を行います"`
+	User string `short:"u" description:"ユーザ名を入力します"`
 }
 var opts Option
 
@@ -23,23 +24,23 @@ func main() {
 		os.Exit(1)
 	}
 
-	if len(opts.Start) != 0 {
-		fmt.Println("Start")
+	if opts.Start {
+		fmt.Println("Start", opts.User)
 		// 会議開始機能
-	} else if len(opts.Register) != 0 {
-		fmt.Println("Register")
+	} else if opts.Register {
+		fmt.Println("Register", opts.User)
 		// 会議登録機能
-	} else if len(opts.List) != 0 {
-		fmt.Println("List")
+	} else if opts.List {
+		fmt.Println("List", opts.User)
 		// 登録会議閲覧機能
-	} else if len(opts.Edit) != 0 {
-		fmt.Println("Edit")
+	} else if opts.Edit {
+		fmt.Println("Edit", opts.User)
 		// 登録会議編集・削除機能
-	} else if len(opts.Setting) != 0 {
-		fmt.Println("Setting")
+	} else if opts.Setting {
+		fmt.Println("Setting", opts.User)
 		// 設定変更機能
 	} else {
-		model.CreateUser("test")
+		repository.CreateUser("test")
 		flags.NewParser(&opts, flags.Default).WriteHelp(os.Stdout)
 		os.Exit(0)
 	}
