@@ -6,16 +6,7 @@ import (
 	"log"
 )
 
-type DayOfWeek int
-const (
-	Sunday = iota
-	Monday
-	Tuesday
-	Wednesday
-	Thursday
-	Friday
-	Saturday
-)
+type DayOfWeek string
 
 type Meet struct {
 	Dispose bool 		`db:"dispose"`
@@ -56,3 +47,28 @@ func CreateUser(name string) {
 	}
 }
 
+func MakeMeet(name string, meet Meet) {
+	db, err := sqlx.Open("mysql", "melq:pass@/meet")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer func(db *sqlx.DB) {
+		err := db.Close()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	} (db)
+
+	if meet.Dispose {
+		_, err = db.NamedExec("INSERT INTO "+name+
+			"(dispose, meet_name, url, meet_date, meet_time)"+
+			"VALUE (:dispose, :meet_name, :url, :meet_date, :meet_time)", meet)
+	} else {
+		_, err = db.NamedExec("INSERT INTO "+name+
+			"(dispose, meet_name, url, day_of_week, meet_time)"+
+			"VALUE (:dispose, :meet_name, :url, :day_of_week, :meet_time)", meet)
+	}
+	if err != nil {
+		log.Fatalln(err)
+	}
+}

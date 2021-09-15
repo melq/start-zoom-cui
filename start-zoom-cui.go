@@ -24,15 +24,31 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	if opts.Make {
-		fmt.Println("Make", opts.User)
+	if opts.Register {
+		fmt.Println("Register", opts.User)
 		repository.CreateUser(opts.User)
+	} else if opts.Make {
+		fmt.Println("Make", opts.User)
+		repository.MakeMeet(opts.User, repository.Meet{
+			Dispose: false,
+			Name:    "test",
+			Url:     "example.com",
+			Day:     "Sunday",
+			Date:    "",
+			Time:    "150500",
+		})
+		repository.MakeMeet("teest", repository.Meet{
+			Dispose: true,
+			Name:    "test",
+			Url:     "example.com",
+			Day:     "",
+			Date:    "210916",
+			Time:    "030500",
+		})
+		// 会議登録機能
 	} else if opts.Start {
 		fmt.Println("Start", opts.User)
 		// 会議開始機能
-	} else if opts.Register {
-		fmt.Println("Register", opts.User)
-		// 会議登録機能
 	} else if opts.List {
 		fmt.Println("List", opts.User)
 		// 登録会議閲覧機能
