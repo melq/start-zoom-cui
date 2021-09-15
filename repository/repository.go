@@ -6,6 +6,26 @@ import (
 	"log"
 )
 
+type DayOfWeek int
+const (
+	Sunday = iota
+	Monday
+	Tuesday
+	Wednesday
+	Thursday
+	Friday
+	Saturday
+)
+
+type Meet struct {
+	Dispose bool 		`db:"dispose"`
+	Name 	string		`db:"meet_name"`
+	Url 	string		`db:"url"`
+	Day 	DayOfWeek 	`db:"day_of_week"`
+	Date 	string		`db:"meet_date"`
+	Time 	string		`db:"meet_time"`
+}
+
 func CreateUser(name string) {
 	db, err := sqlx.Open("mysql", "melq:pass@/meet")
 	if err != nil {
@@ -35,3 +55,4 @@ func CreateUser(name string) {
 		log.Fatalln(err)
 	}
 }
+

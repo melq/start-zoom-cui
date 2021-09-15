@@ -8,8 +8,9 @@ import (
 )
 
 type Option struct {
+	Register bool `short:"r" long:"register" description:"アカウントを作成します"`
 	Start bool `short:"s" long:"start" description:"近い会議を開始します"`
-	Register bool `short:"r" long:"register" description:"会議の予定を作成します"`
+	Make bool `short:"m" long:"make" description:"会議の予定を作成します"`
 	List bool `short:"l" long:"list" description:"登録されている会議の一覧を表示します"`
 	Edit bool `short:"e" long:"edit" description:"登録されている会議の編集・削除を行います"`
 	Setting bool `long:"setting" description:"設定を行います"`
@@ -23,8 +24,10 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
-	if opts.Start {
+	if opts.Make {
+		fmt.Println("Make", opts.User)
+		repository.CreateUser(opts.User)
+	} else if opts.Start {
 		fmt.Println("Start", opts.User)
 		// 会議開始機能
 	} else if opts.Register {
@@ -40,7 +43,6 @@ func main() {
 		fmt.Println("Setting", opts.User)
 		// 設定変更機能
 	} else {
-		repository.CreateUser("test")
 		flags.NewParser(&opts, flags.Default).WriteHelp(os.Stdout)
 		os.Exit(0)
 	}
