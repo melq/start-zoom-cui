@@ -1,20 +1,23 @@
 package repository
 
 import (
+	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/jmoiron/sqlx/types"
 	"log"
 )
 
-type DayOfWeek string
+type Bit int
 
 type Meet struct {
-	Dispose bool 		`db:"dispose"`
-	Name 	string		`db:"meet_name"`
-	Url 	string		`db:"url"`
-	Day 	DayOfWeek 	`db:"day_of_week"`
-	Date 	string		`db:"meet_date"`
-	Time 	string		`db:"meet_time"`
+	Id		int				`db:"id"`
+	Dispose types.BitBool 	`db:"dispose"`
+	Name 	string			`db:"meet_name"`
+	Url 	string			`db:"url"`
+	Day 	sql.NullString 	`db:"day_of_week"`
+	Date 	sql.NullString	`db:"meet_date"`
+	Time 	string			`db:"meet_time"`
 }
 
 func CreateUser(name string) {
@@ -71,4 +74,30 @@ func MakeMeet(name string, meet Meet) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+}
+
+func GetMeets(name string) []Meet {
+	db, err := sqlx.Open("mysql", "melq:pass@/meet")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer func(db *sqlx.DB) {
+		err := db.Close()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	} (db)
+	
+	var meetList []Meet
+	rows, err := db.Queryx("SELECT * FROM " + name + " ORDER BY dispose DESC")
+	if err != nil {
+		log.Fatalln(err)
+		return nil
+	}
+	for rows.Next() {
+		var meet Meet
+		err = rows.StructScan(&meet)
+		meetList = append(meetList, meet)
+	}
+	return meetList
 }

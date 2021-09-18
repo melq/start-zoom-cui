@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"os"
@@ -35,18 +36,18 @@ func main() {
 				Dispose: false,
 				Name:    "test" + strconv.Itoa(i),
 				Url:     "example.com" + "/" + strconv.Itoa(i),
-				Day:     "Sunday",
-				Date:    "",
-				Time:    strconv.Itoa(150500 + i),
+				Day:     sql.NullString{String: "Sunday", Valid: true},
+				Date:    sql.NullString{Valid: false},
+				Time:    fmt.Sprintf("%06d", 150500 + i),
 			})
 
 			repository.MakeMeet(opts.User, repository.Meet{
 				Dispose: true,
 				Name:    "test" + strconv.Itoa(-i),
 				Url:     "example.com" + "/" + strconv.Itoa(-i),
-				Day:     "",
-				Date:    strconv.Itoa(210916 - i),
-				Time:    strconv.Itoa(030500 - i),
+				Day:     sql.NullString{Valid: false},
+				Date:    sql.NullString{String: strconv.Itoa(210916 - i), Valid: true},
+				Time:    fmt.Sprintf("%06d", 30500 + i),
 			})
 		}
 		// 会議登録機能
@@ -55,6 +56,11 @@ func main() {
 		// 会議開始機能
 	} else if opts.List {
 		fmt.Println("List", opts.User)
+		meetList := repository.GetMeets(opts.User)
+		fmt.Println(len(meetList))
+		for _, meet := range meetList {
+			fmt.Println(meet)
+		}
 		// 登録会議閲覧機能
 	} else if opts.Edit {
 		fmt.Println("Edit", opts.User)
