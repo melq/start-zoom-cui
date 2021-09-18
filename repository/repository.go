@@ -89,15 +89,10 @@ func GetMeets(name string) []Meet {
 	} (db)
 	
 	var meetList []Meet
-	rows, err := db.Queryx("SELECT * FROM " + name + " ORDER BY dispose DESC")
+	err = db.Select(&meetList, "SELECT * FROM "+name+" ORDER BY dispose DESC")
 	if err != nil {
 		log.Fatalln(err)
 		return nil
-	}
-	for rows.Next() {
-		var meet Meet
-		err = rows.StructScan(&meet)
-		meetList = append(meetList, meet)
 	}
 	return meetList
 }
