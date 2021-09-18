@@ -5,6 +5,7 @@ import (
 	"github.com/jessevdk/go-flags"
 	"os"
 	"start-zoom-cui/repository"
+	"strconv"
 )
 
 type Option struct {
@@ -29,22 +30,25 @@ func main() {
 		repository.CreateUser(opts.User)
 	} else if opts.Make {
 		fmt.Println("Make", opts.User)
-		repository.MakeMeet(opts.User, repository.Meet{
-			Dispose: false,
-			Name:    "test",
-			Url:     "example.com",
-			Day:     "Sunday",
-			Date:    "",
-			Time:    "150500",
-		})
-		repository.MakeMeet("teest", repository.Meet{
-			Dispose: true,
-			Name:    "test",
-			Url:     "example.com",
-			Day:     "",
-			Date:    "210916",
-			Time:    "030500",
-		})
+		for i := 0; i < 5; i++ {
+			repository.MakeMeet(opts.User, repository.Meet{
+				Dispose: false,
+				Name:    "test" + strconv.Itoa(i),
+				Url:     "example.com" + "/" + strconv.Itoa(i),
+				Day:     "Sunday",
+				Date:    "",
+				Time:    strconv.Itoa(150500 + i),
+			})
+
+			repository.MakeMeet(opts.User, repository.Meet{
+				Dispose: true,
+				Name:    "test" + strconv.Itoa(-i),
+				Url:     "example.com" + "/" + strconv.Itoa(-i),
+				Day:     "",
+				Date:    strconv.Itoa(210916 - i),
+				Time:    strconv.Itoa(030500 - i),
+			})
+		}
 		// 会議登録機能
 	} else if opts.Start {
 		fmt.Println("Start", opts.User)
