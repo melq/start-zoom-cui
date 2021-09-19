@@ -4,19 +4,26 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/jessevdk/go-flags"
+	"github.com/jmoiron/sqlx/types"
 	"os"
 	"start-zoom-cui/repository"
-	"strconv"
 )
 
 type Option struct {
-	Register bool `short:"r" long:"register" description:"アカウントを作成します"`
-	Start bool `short:"s" long:"start" description:"近い会議を開始します"`
-	Make bool `short:"m" long:"make" description:"会議の予定を作成します"`
-	List bool `short:"l" long:"list" description:"登録されている会議の一覧を表示します"`
-	Edit bool `short:"e" long:"edit" description:"登録されている会議の編集・削除を行います"`
-	Setting bool `long:"setting" description:"設定を行います"`
-	User string `short:"u" description:"ユーザ名を入力します"`
+	Register bool	`short:"r" long:"register" description:"アカウントを作成します"`
+	Start bool		`short:"s" long:"start" description:"近い会議を開始します"`
+	Make bool		`short:"m" long:"make" description:"会議の予定を作成します"`
+	List bool		`short:"l" long:"list" description:"登録されている会議の一覧を表示します"`
+	Edit bool		`short:"e" long:"edit" description:"登録されている会議の編集・削除を行います"`
+	Setting bool	`long:"setting" description:"設定を行います"`
+	User string		`short:"u" description:"ユーザ名を入力します"`
+
+	Dispose bool	`long:"dispose"`
+	Name string		`long:"name"`
+	Url string		`long:"url"`
+	Day string		`long:"day"`
+	Date string		`long:"date"`
+	Time string		`long:"time"`
 }
 var opts Option
 
@@ -26,12 +33,24 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
 	if opts.Register {
 		fmt.Println("Register", opts.User)
 		repository.CreateUser(opts.User)
 	} else if opts.Make {
 		fmt.Println("Make", opts.User)
-		makeMeets()
+		meet := repository.Meet{
+			Dispose: types.BitBool(opts.Dispose),
+			Name: opts.Name,
+			Url: opts.Url,
+			Time: opts.Time,
+		}
+		if meet.Dispose {
+			meet.Date = sql.NullString{String: opts.Date, Valid: true}
+		} else {
+			meet.Day = sql.NullString{String: opts.Day, Valid: true}
+		}
+		makeMeet(opts.User, meet)
 		// 会議登録機能 // 情報入力の仕様要検討
 	} else if opts.Start {
 		fmt.Println("Start", opts.User)
@@ -52,8 +71,10 @@ func main() {
 	}
 }
 
-func makeMeets() { // TEST
-	for i := 0; i < 5; i++ {
+func makeMeet(userName string, meet repository.Meet) {
+	repository.MakeMeet(userName, meet)
+
+	/*for i := 0; i < 5; i++ { // TEST
 		repository.MakeMeet(opts.User, repository.Meet{
 			Dispose: false,
 			Name:    "test" + strconv.Itoa(i),
@@ -71,7 +92,7 @@ func makeMeets() { // TEST
 			Date:    sql.NullString{String: strconv.Itoa(210916 - i), Valid: true},
 			Time:    fmt.Sprintf("%06d", 30500 + i),
 		})
-	}
+	}*/
 }
 
 func showList() {
