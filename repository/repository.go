@@ -21,19 +21,24 @@ type Meet struct {
 	Time 	string			`db:"meet_time"`
 }
 
-func CreateUser(name string) {
+func getDB() *sqlx.DB {
 	db, err := sqlx.Open("mysql", "melq:pass@/meet")
 	if err != nil {
 		log.Fatalln(err)
 	}
+	return db
+}
+
+func CreateUser(user string) {
+	db := getDB()
 	defer func(db *sqlx.DB) {
 		err := db.Close()
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatalln()
 		}
-	} (db)
+	}(db)
 
-	var schema = "CREATE TABLE IF NOT EXISTS " + name + // ユーザ毎のテーブルを作成するクエリ
+	var schema = "CREATE TABLE IF NOT EXISTS " + user + // ユーザ毎のテーブルを作成するクエリ
 		"(id int not null primary key auto_increment," +
 		" dispose bit not null," +
 		" meet_name varchar(32) not null," +
@@ -43,26 +48,24 @@ func CreateUser(name string) {
 		" meet_time time)"
 
 	tx := db.MustBegin()
-	tx.MustExec("INSERT INTO users (name) VALUES (?)", name)
+	tx.MustExec("INSERT INTO users (name) VALUES (?)", user)
 	log.Println(tx.MustExec(schema))
-	err = tx.Commit()
+	err := tx.Commit()
 	if err != nil {
 		log.Fatalln(err)
 	}
 }
 
 func MakeMeet(name string, meet Meet) {
-	db, err := sqlx.Open("mysql", "melq:pass@/meet")
-	if err != nil {
-		log.Fatalln(err)
-	}
+	db := getDB()
 	defer func(db *sqlx.DB) {
 		err := db.Close()
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatalln()
 		}
-	} (db)
+	}(db)
 
+	var err error
 	if meet.Dispose {
 		_, err = db.NamedExec("INSERT INTO "+name+
 			"(dispose, meet_name, url, meet_date, meet_time)"+
@@ -78,19 +81,16 @@ func MakeMeet(name string, meet Meet) {
 }
 
 func GetMeets(name string) []Meet {
-	db, err := sqlx.Open("mysql", "melq:pass@/meet")
-	if err != nil {
-		log.Fatalln(err)
-	}
+	db := getDB()
 	defer func(db *sqlx.DB) {
 		err := db.Close()
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatalln()
 		}
-	} (db)
+	}(db)
 	
 	var meetList []Meet
-	err = db.Select(&meetList, "SELECT * FROM " + name + " ORDER BY dispose DESC, meet_date, day_of_week")
+	err := db.Select(&meetList, "SELECT * FROM " + name + " ORDER BY dispose DESC, meet_date, day_of_week")
 	if err != nil {
 		log.Fatalln(err)
 		return nil
@@ -99,19 +99,16 @@ func GetMeets(name string) []Meet {
 }
 
 func GetMeet(user string, name string) Meet {
-	db, err := sqlx.Open("mysql", "melq:pass@/meet")
-	if err != nil {
-		log.Fatalln(err)
-	}
+	db := getDB()
 	defer func(db *sqlx.DB) {
 		err := db.Close()
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatalln()
 		}
-	} (db)
+	}(db)
 
 	meet := Meet{}
-	err = db.Get(&meet, "SELECT * FROM " + user + " WHERE meet_name=?", name)
+	err := db.Get(&meet, "SELECT * FROM " + user + " WHERE meet_name=?", name)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -119,17 +116,15 @@ func GetMeet(user string, name string) Meet {
 }
 
 func UpdateMeet(user string, meet Meet) {
-	db, err := sqlx.Open("mysql", "melq:pass@/meet")
-	if err != nil {
-		log.Fatalln(err)
-	}
+	db := getDB()
 	defer func(db *sqlx.DB) {
 		err := db.Close()
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatalln()
 		}
-	} (db)
+	}(db)
 
+	fmt.Println(meet)
 	tx := db.MustBegin()
 	tx.MustExec("UPDATE " + user + " SET url=? WHERE meet_name='" + meet.Name + "'", meet.Url)
 	if meet.Day.Valid == true {
@@ -140,10 +135,10 @@ func UpdateMeet(user string, meet Meet) {
 		tx.MustExec("UPDATE " + user + " SET meet_date=? WHERE meet_name='" + meet.Name + "'", meet.Date.String)
 	}
 	tx.MustExec("UPDATE " + user + " SET meet_time=? WHERE meet_name='" + meet.Name + "'", meet.Time)
-	fmt.Println(meet)
-	err = tx.Commit()
+	err := tx.Commit()
 	if err != nil {
 		log.Fatalln(err)
 		return
 	}
+	fmt.Println(meet)
 }

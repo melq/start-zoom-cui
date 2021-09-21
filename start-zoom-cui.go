@@ -117,7 +117,6 @@ func showList() {
 func editMeet(opts Option) {
 	fmt.Println(opts.Date)
 	meet := repository.GetMeet(opts.User, opts.Name)
-	fmt.Println(meet)
 	if opts.Url != "" { meet.Url = opts.Url }
 	if len(opts.Date) > 0 { meet.Date = sql.NullString{ String: opts.Date, Valid: true } }
 	if len(opts.Day) > 0 { meet.Day = sql.NullString{ String: opts.Day, Valid: true } }
