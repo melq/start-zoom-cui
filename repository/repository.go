@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
@@ -89,10 +90,60 @@ func GetMeets(name string) []Meet {
 	} (db)
 	
 	var meetList []Meet
-	err = db.Select(&meetList, "SELECT * FROM "+name+" ORDER BY dispose DESC")
+	err = db.Select(&meetList, "SELECT * FROM " + name + " ORDER BY dispose DESC, meet_date, day_of_week")
 	if err != nil {
 		log.Fatalln(err)
 		return nil
 	}
 	return meetList
+}
+
+func GetMeet(user string, name string) Meet {
+	db, err := sqlx.Open("mysql", "melq:pass@/meet")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer func(db *sqlx.DB) {
+		err := db.Close()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	} (db)
+
+	meet := Meet{}
+	err = db.Get(&meet, "SELECT * FROM " + user + " WHERE meet_name=?", name)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return meet
+}
+
+func UpdateMeet(user string, meet Meet) {
+	db, err := sqlx.Open("mysql", "melq:pass@/meet")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer func(db *sqlx.DB) {
+		err := db.Close()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	} (db)
+
+	tx := db.MustBegin()
+	tx.MustExec("UPDATE " + user + " SET url=? WHERE meet_name='" + meet.Name + "'", meet.Url)
+	if meet.Day.Valid == true {
+		fmt.Println(meet.Day)
+		tx.MustExec("UPDATE " + user + " SET day_of_week=? WHERE meet_name='" + meet.Name + "'", meet.Day.String)
+	}
+	if meet.Date.Valid == true {
+		tx.MustExec("UPDATE " + user + " SET meet_date=? WHERE meet_name='" + meet.Name + "'", meet.Date.String)
+	}
+	tx.MustExec("UPDATE " + user + " SET meet_time=? WHERE meet_name='" + meet.Name + "'", meet.Time)
+	fmt.Println(meet)
+	err = tx.Commit()
+	if err != nil {
+		log.Fatalln(err)
+		return
+	}
 }

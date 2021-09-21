@@ -37,6 +37,7 @@ func main() {
 	if opts.Register {
 		fmt.Println("Register", opts.User)
 		repository.CreateUser(opts.User)
+
 	} else if opts.Make {
 		fmt.Println("Make", opts.User)
 		meet := repository.Meet{
@@ -50,21 +51,25 @@ func main() {
 		} else {
 			meet.Day = sql.NullString{String: opts.Day, Valid: true}
 		}
-		makeMeet(opts.User, meet)
-		// 会議登録機能 // 情報入力の仕様要検討
-	} else if opts.Start {
-		fmt.Println("Start", opts.User)
-		// 会議開始機能
+		makeMeet(opts.User, meet) // 情報入力の仕様要検討
+
 	} else if opts.List {
 		fmt.Println("List", opts.User)
 		showList()
-		// 登録会議閲覧機能
+
+	} else if opts.Start {
+		fmt.Println("Start", opts.User)
+		// 会議開始機能
+
 	} else if opts.Edit {
 		fmt.Println("Edit", opts.User)
+		editMeet(opts)
 		// 登録会議編集・削除機能
+
 	} else if opts.Setting {
 		fmt.Println("Setting", opts.User)
 		// 設定変更機能
+
 	} else {
 		flags.NewParser(&opts, flags.Default).WriteHelp(os.Stdout)
 		os.Exit(0)
@@ -107,4 +112,15 @@ func showList() {
 		}
 		fmt.Println(" " + meet.Time + "\n")
 	}
+}
+
+func editMeet(opts Option) {
+	fmt.Println(opts.Date)
+	meet := repository.GetMeet(opts.User, opts.Name)
+	fmt.Println(meet)
+	if opts.Url != "" { meet.Url = opts.Url }
+	if len(opts.Date) > 0 { meet.Date = sql.NullString{ String: opts.Date, Valid: true } }
+	if len(opts.Day) > 0 { meet.Day = sql.NullString{ String: opts.Day, Valid: true } }
+	if opts.Time != "" { meet.Time = opts.Time }
+	repository.UpdateMeet(opts.User, meet)
 }
