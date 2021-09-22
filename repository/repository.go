@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
 	"log"
+	"strconv"
 )
 
 type Bit int
@@ -112,6 +113,7 @@ func GetMeet(user string, name string) Meet {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	fmt.Println(meet)
 	return meet
 }
 
@@ -124,17 +126,18 @@ func UpdateMeet(user string, meet Meet) {
 		}
 	}(db)
 
-	fmt.Println(meet)
+	id := strconv.Itoa(meet.Id)
 	tx := db.MustBegin()
-	tx.MustExec("UPDATE " + user + " SET url=? WHERE meet_name='" + meet.Name + "'", meet.Url)
+	tx.MustExec("UPDATE " + user + " SET meet_name=? WHERE id='" + id + "'", meet.Name)
+	tx.MustExec("UPDATE " + user + " SET url=? WHERE id='" + id + "'", meet.Url)
 	if meet.Day.Valid == true {
-		fmt.Println(meet.Day)
-		tx.MustExec("UPDATE " + user + " SET day_of_week=? WHERE meet_name='" + meet.Name + "'", meet.Day.String)
+		tx.MustExec("UPDATE " + user + " SET day_of_week=? WHERE id='" + id + "'", meet.Day.String)
 	}
 	if meet.Date.Valid == true {
-		tx.MustExec("UPDATE " + user + " SET meet_date=? WHERE meet_name='" + meet.Name + "'", meet.Date.String)
+		tx.MustExec("UPDATE " + user + " SET meet_date=? WHERE id='" + id + "'", meet.Date.String)
 	}
-	tx.MustExec("UPDATE " + user + " SET meet_time=? WHERE meet_name='" + meet.Name + "'", meet.Time)
+	tx.MustExec("UPDATE " + user + " SET meet_time=? WHERE id='" + id + "'", meet.Time)
+	tx.MustExec("UPDATE " + user + " SET dispose=? WHERE id='" + id + "'", meet.Dispose)
 	err := tx.Commit()
 	if err != nil {
 		log.Fatalln(err)
