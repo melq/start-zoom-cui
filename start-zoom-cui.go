@@ -118,8 +118,16 @@ func editMeet(opts Option) {
 	fmt.Println(opts.Date)
 	meet := repository.GetMeet(opts.User, opts.Name)
 	if opts.Url != "" { meet.Url = opts.Url }
-	if len(opts.Date) > 0 { meet.Date = sql.NullString{ String: opts.Date, Valid: true } }
-	if len(opts.Day) > 0 { meet.Day = sql.NullString{ String: opts.Day, Valid: true } }
+	if len(opts.Day) > 0 {
+		meet.Day = sql.NullString{ String: opts.Day, Valid: true }
+		meet.Dispose = false
+		meet.Date.Valid = false
+	}
+	if len(opts.Date) > 0 { // 曜日よりも日付指定を優先するので、こちらが後
+		meet.Date = sql.NullString{ String: opts.Date, Valid: true }
+		meet.Dispose = true
+		meet.Day.Valid = false
+	}
 	if opts.Time != "" { meet.Time = opts.Time }
 	repository.UpdateMeet(opts.User, meet)
 }
