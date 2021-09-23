@@ -14,16 +14,17 @@ type Option struct {
 	Start bool		`short:"s" long:"start" description:"近い会議を開始します"`
 	Make bool		`short:"m" long:"make" description:"会議の予定を作成します"`
 	List bool		`short:"l" long:"list" description:"登録されている会議の一覧を表示します"`
-	Edit bool		`short:"e" long:"edit" description:"登録されている会議の編集・削除を行います"`
+	Edit bool		`short:"e" long:"edit" description:"登録されている会議の編集を行います"`
+	Delete bool		`short:"d" long:"delete" description:"登録されている会議の削除を行います"`
 	Setting bool	`long:"setting" description:"設定を行います"`
 	User string		`short:"u" description:"ユーザ名を入力します"`
 
-	Dispose bool	`long:"dispose"`
-	Name string		`long:"name"`
-	Url string		`long:"url"`
-	Day string		`long:"day"`
-	Date string		`long:"date"`
-	Time string		`long:"time"`
+	Dispose bool	`long:"dispose" description:"一度のみの会議の場合指定します"`
+	Name string		`long:"name" description:"会議の名前を入力します"`
+	Url string		`long:"url" description:"会議のURLを入力します"`
+	Day string		`long:"day" description:"定期的な会議の場合、その曜日を入力します(形式: Sunday, Monday..)"`
+	Date string		`long:"date" description:"定期的でない単発の会議の場合、その日付を入力します(形式: 2021年9月20日 -> 210920)"`
+	Time string		`long:"time" description:"会議の開始時刻を入力します(形式: 15:00:00 -> 150000)"`
 }
 var opts Option
 
