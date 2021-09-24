@@ -145,3 +145,18 @@ func UpdateMeet(user string, meet Meet) {
 	}
 	fmt.Println(meet)
 }
+
+func DeleteMeet(user string, meetName string) {
+	db := getDB()
+	defer func(db *sqlx.DB) {
+		err := db.Close()
+		if err != nil {
+			log.Fatalln()
+		}
+	}(db)
+
+	_, err := db.Queryx("DELETE FROM " + user + " WHERE meet_name=? LIMIT 1", meetName)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}

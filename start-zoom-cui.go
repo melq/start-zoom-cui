@@ -67,6 +67,10 @@ func main() {
 		editMeet(opts)
 		// 登録会議編集・削除機能
 
+	} else if opts.Delete {
+		fmt.Println("Delete", opts.User)
+		deleteMeet(opts)
+
 	} else if opts.Setting {
 		fmt.Println("Setting", opts.User)
 		// 設定変更機能
@@ -116,7 +120,6 @@ func showList() {
 }
 
 func editMeet(opts Option) {
-	fmt.Println(opts.Date)
 	meet := repository.GetMeet(opts.User, opts.Name)
 	if opts.Url != "" { meet.Url = opts.Url }
 	if len(opts.Day) > 0 {
@@ -131,4 +134,8 @@ func editMeet(opts Option) {
 	}
 	if opts.Time != "" { meet.Time = opts.Time }
 	repository.UpdateMeet(opts.User, meet)
+}
+
+func deleteMeet(opts Option) {
+	repository.DeleteMeet(opts.User, opts.Name)
 }
