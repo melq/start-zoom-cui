@@ -156,9 +156,11 @@ func UpdateMeet(user string, meet Meet) {
 	tx.MustExec("UPDATE " + user + " SET url=? WHERE id='" + id + "'", meet.Url)
 	if meet.Day.Valid == true {
 		tx.MustExec("UPDATE " + user + " SET day_of_week=? WHERE id='" + id + "'", meet.Day.String)
+		tx.MustExec("UPDATE " + user + " SET meet_date=? WHERE id='" + id + "'", nil)
 	}
 	if meet.Date.Valid == true {
 		tx.MustExec("UPDATE " + user + " SET meet_date=? WHERE id='" + id + "'", meet.Date.String)
+		tx.MustExec("UPDATE " + user + " SET day_of_week=? WHERE id='" + id + "'", nil)
 	}
 	tx.MustExec("UPDATE " + user + " SET meet_time=? WHERE id='" + id + "'", meet.Time)
 	tx.MustExec("UPDATE " + user + " SET dispose=? WHERE id='" + id + "'", meet.Dispose)
