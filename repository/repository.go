@@ -81,7 +81,7 @@ func MakeMeet(name string, meet Meet) {
 	}
 }
 
-func GetMeets(name string) []Meet {
+func GetMeets(user string) []Meet {
 	db := getDB()
 	defer func(db *sqlx.DB) {
 		err := db.Close()
@@ -91,7 +91,31 @@ func GetMeets(name string) []Meet {
 	}(db)
 	
 	var meetList []Meet
-	err := db.Select(&meetList, "SELECT * FROM " + name + " ORDER BY dispose DESC, meet_date, day_of_week")
+	err := db.Select(&meetList, "SELECT * FROM " + user + " ORDER BY dispose DESC, meet_date, day_of_week")
+	if err != nil {
+		log.Fatalln(err)
+		return nil
+	}
+	return meetList
+}
+
+func GetMeetsWithOpts(user string, mode int) []Meet {
+	db := getDB()
+	defer func(db *sqlx.DB) {
+		err := db.Close()
+		if err != nil {
+			log.Fatalln()
+		}
+	}(db)
+
+	var meetList []Meet
+	var err error
+	if mode == 0 {
+		err = db.Select(&meetList, "SELECT * FROM " + user + " WHERE dispose=true ORDER BY dispose DESC, meet_date, day_of_week")
+	} else {
+		err = db.Select(&meetList, "SELECT * FROM " + user + " WHERE dispose=false ORDER BY dispose DESC, meet_date, day_of_week")
+	}
+
 	if err != nil {
 		log.Fatalln(err)
 		return nil
