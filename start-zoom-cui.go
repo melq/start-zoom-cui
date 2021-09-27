@@ -67,12 +67,10 @@ func main() {
 	} else if opts.Edit {
 		fmt.Println("Edit", opts.User)
 		editMeet(opts)
-		// 登録会議編集機能
 
 	} else if opts.Delete {
 		fmt.Println("Delete", opts.User)
 		deleteMeet(opts)
-		// 登録会議削除機能
 
 	} else if opts.Setting {
 		fmt.Println("Setting", opts.User)
