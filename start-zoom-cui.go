@@ -24,7 +24,8 @@ type Option struct {
 	Url string		`long:"url" description:"会議のURLを入力します"`
 	Day string		`long:"day" description:"定期的な会議の場合、その曜日を入力します(形式: Sunday, Monday..)"`
 	Date string		`long:"date" description:"定期的でない単発の会議の場合、その日付を入力します(形式: 2021年9月20日 -> 210920)"`
-	Time string		`long:"time" description:"会議の開始時刻を入力します(形式: 15:00:00 -> 150000)"`
+	STime string	`long:"stime" description:"会議の開始時刻を入力します(形式: 15:00:00 -> 150000)"`
+	ETime string	`long:"etime" description:"会議の開始時刻を入力します(形式: 15:00:00 -> 150000)"`
 }
 var opts Option
 
@@ -45,14 +46,15 @@ func main() {
 			Dispose: types.BitBool(opts.Dispose),
 			Name: opts.Name,
 			Url: opts.Url,
-			Time: opts.Time,
+			STime: opts.STime,
+			ETime: opts.ETime,
 		}
 		if meet.Dispose {
 			meet.Date = sql.NullString{String: opts.Date, Valid: true}
 		} else {
 			meet.Day = sql.NullString{String: opts.Day, Valid: true}
 		}
-		makeMeet(opts.User, meet) // 情報入力の仕様要検討
+		makeMeet(opts, meet) // 情報入力の仕様要検討
 
 	} else if opts.List {
 		fmt.Println("List", opts.User)
@@ -60,8 +62,7 @@ func main() {
 
 	} else if opts.Start {
 		fmt.Println("Start", opts.User)
-		fmt.Println(repository.GetMeetsWithOpts(opts.User, 0))
-		fmt.Println(repository.GetMeetsWithOpts(opts.User, 1))
+		startMeet(opts)
 		// 会議開始機能
 
 	} else if opts.Edit {
@@ -82,26 +83,28 @@ func main() {
 	}
 }
 
-func makeMeet(userName string, meet repository.Meet) {
-	repository.MakeMeet(userName, meet)
+func makeMeet(opts Option, meet repository.Meet) {
+	repository.MakeMeet(opts.User, meet)
 
-	/*for i := 0; i < 5; i++ { // TEST
+	/*for i := 0; i < 3; i++ { // TEST
 		repository.MakeMeet(opts.User, repository.Meet{
-			Dispose: false,
-			Name:    "test" + strconv.Itoa(i),
-			Url:     "example.com" + "/" + strconv.Itoa(i),
-			Day:     sql.NullString{String: "Sunday", Valid: true},
-			Date:    sql.NullString{Valid: false},
-			Time:    fmt.Sprintf("%06d", 150500 + i),
+			Dispose:	false,
+			Name:    	"test" + strconv.Itoa(i),
+			Url:     	"example.com" + "/" + strconv.Itoa(i),
+			Day:     	sql.NullString{String: "Sunday", Valid: true},
+			Date:    	sql.NullString{Valid: false},
+			STime:   	fmt.Sprintf("%06d", 150500 + i),
+			ETime:		fmt.Sprintf("%06d", 173000 + i),
 		})
 
 		repository.MakeMeet(opts.User, repository.Meet{
-			Dispose: true,
-			Name:    "test" + strconv.Itoa(-i),
-			Url:     "example.com" + "/" + strconv.Itoa(-i),
-			Day:     sql.NullString{Valid: false},
-			Date:    sql.NullString{String: strconv.Itoa(210916 - i), Valid: true},
-			Time:    fmt.Sprintf("%06d", 30500 + i),
+			Dispose:	true,
+			Name:		"test" + strconv.Itoa(-i),
+			Url:		"example.com" + "/" + strconv.Itoa(-i),
+			Day:		sql.NullString{Valid: false},
+			Date:		sql.NullString{String: strconv.Itoa(210916 - i), Valid: true},
+			STime:		fmt.Sprintf("%06d", 30500 + i),
+			ETime: 		fmt.Sprintf("%06d", 53000 + i),
 		})
 	}*/
 }
@@ -116,8 +119,20 @@ func showList() {
 		} else {
 			fmt.Print("曜日: " + meet.Day.String)
 		}
-		fmt.Println(" " + meet.Time + "\n")
+		fmt.Print(" " + meet.STime + " - ")
+		fmt.Println(meet.ETime + "\n")
 	}
+}
+
+func startMeet(opts Option) {
+	/*meetList := repository.GetMeetsWithOpts(opts.User, 0)
+	now := time.Now()
+	var nextMeet repository.Meet
+	for i, meet := range meetList {
+
+	}
+
+	meetList = repository.GetMeetsWithOpts(opts.User, 1)*/
 }
 
 func editMeet(opts Option) {
@@ -133,7 +148,8 @@ func editMeet(opts Option) {
 		meet.Dispose = true
 		meet.Day.Valid = false
 	}
-	if opts.Time != "" { meet.Time = opts.Time }
+	if opts.STime != "" { meet.STime = opts.STime }
+	if opts.ETime != "" { meet.ETime = opts.ETime }
 	repository.UpdateMeet(opts.User, meet)
 }
 

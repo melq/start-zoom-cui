@@ -19,7 +19,8 @@ type Meet struct {
 	Url 	string			`db:"url"`
 	Day 	sql.NullString 	`db:"day_of_week"`
 	Date 	sql.NullString	`db:"meet_date"`
-	Time 	string			`db:"meet_time"`
+	STime 	string			`db:"start_time"`
+	ETime	string			`db:"end_time"`
 }
 
 func getDB() *sqlx.DB {
@@ -46,11 +47,12 @@ func CreateUser(user string) {
 		" url varchar(256) not null," +
 		" day_of_week enum('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday')," +
 		" meet_date date," +
-		" meet_time time)"
+		" start_time time not null," +
+		" end_time time not null)"
 
 	tx := db.MustBegin()
 	tx.MustExec("INSERT INTO users (name) VALUES (?)", user)
-	log.Println(tx.MustExec(schema))
+	tx.MustExec(schema)
 	err := tx.Commit()
 	if err != nil {
 		log.Fatalln(err)
@@ -69,12 +71,12 @@ func MakeMeet(name string, meet Meet) {
 	var err error
 	if meet.Dispose {
 		_, err = db.NamedExec("INSERT INTO "+name+
-			"(dispose, meet_name, url, meet_date, meet_time)"+
-			"VALUE (:dispose, :meet_name, :url, :meet_date, :meet_time)", meet)
+			"(dispose, meet_name, url, meet_date, start_time, end_time)"+
+			"VALUE (:dispose, :meet_name, :url, :meet_date, :start_time, :end_time)", meet)
 	} else {
 		_, err = db.NamedExec("INSERT INTO "+name+
-			"(dispose, meet_name, url, day_of_week, meet_time)"+
-			"VALUE (:dispose, :meet_name, :url, :day_of_week, :meet_time)", meet)
+			"(dispose, meet_name, url, day_of_week, start_time, end_time)"+
+			"VALUE (:dispose, :meet_name, :url, :day_of_week, :start_time, :end_time)", meet)
 	}
 	if err != nil {
 		log.Fatalln(err)
@@ -111,9 +113,9 @@ func GetMeetsWithOpts(user string, mode int) []Meet {
 	var meetList []Meet
 	var err error
 	if mode == 0 {
-		err = db.Select(&meetList, "SELECT * FROM " + user + " WHERE dispose=true ORDER BY dispose DESC, meet_date, day_of_week")
+		err = db.Select(&meetList, "SELECT * FROM " + user + " WHERE dispose=true ORDER BY dispose DESC, meet_date, start_time")
 	} else {
-		err = db.Select(&meetList, "SELECT * FROM " + user + " WHERE dispose=false ORDER BY dispose DESC, meet_date, day_of_week")
+		err = db.Select(&meetList, "SELECT * FROM " + user + " WHERE dispose=false ORDER BY dispose DESC, day_of_week, start_time")
 	}
 
 	if err != nil {
@@ -162,7 +164,8 @@ func UpdateMeet(user string, meet Meet) {
 		tx.MustExec("UPDATE " + user + " SET meet_date=? WHERE id='" + id + "'", meet.Date.String)
 		tx.MustExec("UPDATE " + user + " SET day_of_week=? WHERE id='" + id + "'", nil)
 	}
-	tx.MustExec("UPDATE " + user + " SET meet_time=? WHERE id='" + id + "'", meet.Time)
+	tx.MustExec("UPDATE " + user + " SET start_time=? WHERE id='" + id + "'", meet.STime)
+	tx.MustExec("UPDATE " + user + " SET end_time=? WHERE id='" + id + "'", meet.ETime)
 	tx.MustExec("UPDATE " + user + " SET dispose=? WHERE id='" + id + "'", meet.Dispose)
 	err := tx.Commit()
 	if err != nil {
