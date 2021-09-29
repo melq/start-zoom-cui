@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"github.com/jmoiron/sqlx/types"
+	"log"
 	"os"
 	"start-zoom-cui/repository"
+	"time"
 )
 
 type Option struct {
@@ -63,7 +65,6 @@ func main() {
 	} else if opts.Start {
 		fmt.Println("Start", opts.User)
 		startMeet(opts)
-		// 会議開始機能
 
 	} else if opts.Edit {
 		fmt.Println("Edit", opts.User)
@@ -78,8 +79,11 @@ func main() {
 		// 設定変更機能
 
 	} else {
-		flags.NewParser(&opts, flags.Default).WriteHelp(os.Stdout)
-		os.Exit(0)
+		//flags.NewParser(&opts, flags.Default).WriteHelp(os.Stdout)
+		//os.Exit(0)
+		fmt.Println(time.Now().String())
+		date, _ := time.Parse("2006-01-02", "2021-09-14 JST")
+		fmt.Println(date)
 	}
 }
 
@@ -125,14 +129,20 @@ func showList() {
 }
 
 func startMeet(opts Option) {
-	/*meetList := repository.GetMeetsWithOpts(opts.User, 0)
+	meetList := repository.GetMeetsWithOpts(opts.User, 0)
 	now := time.Now()
-	var nextMeet repository.Meet
-	for i, meet := range meetList {
-
+	year, month, day := now.Date()
+	//var nextMeet repository.Meet, var cuurentMeet repository.Meet
+	for _, meet := range meetList {
+		meetDate, err := time.Parse("2006-01-02", meet.Date.String)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		if year == meetDate.Year() && month == meetDate.Month() && day == meetDate.Day() {
+			fmt.Println(meet.Name)
+		}
 	}
-
-	meetList = repository.GetMeetsWithOpts(opts.User, 1)*/
+	//meetList = repository.GetMeetsWithOpts(opts.User, 1)
 }
 
 func editMeet(opts Option) {
