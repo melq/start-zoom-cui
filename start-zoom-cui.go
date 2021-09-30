@@ -135,8 +135,8 @@ func checkTime(meet repository.Meet) int {
 func startMeet(opts Option) {
 	now := time.Now()
 	year, month, day := now.Date()
-	//var nextMeet repository.Meet; var currentMeet repository.Meet
-	//var todayList []repository.Meet
+	var nextMeet repository.Meet; var currentMeet repository.Meet
+	var todayList []repository.Meet
 	meetList := repository.GetMeetsWithOpts(opts.User, 0)
 	for _, meet := range meetList {
 		meetDate, err := time.Parse("2006-01-02", meet.Date.String)
@@ -145,21 +145,41 @@ func startMeet(opts Option) {
 		}
 		if year == meetDate.Year() && month == meetDate.Month() && day == meetDate.Day() {
 			fmt.Println(meet.Name)
-			/*switch checkTime(meet) {
-			case 1: currentMeet = meet
+			switch checkTime(meet) {
+			case 1: {
+				if len(currentMeet.Name) == 0 {
+					currentMeet = meet
+				} else {
+					todayList = append(todayList, meet)
+				}
+			}
 			case 2: todayList = append(todayList, meet)
-			}*/
+			}
 		}
 	}
 	meetList = repository.GetMeetsWithOpts(opts.User, 1)
 	for _, meet := range meetList {
 		if now.Weekday().String() == meet.Day.String {
 			fmt.Println(meet.Name)
-			/*switch checkTime(meet) {
-			case 1: currentMeet = meet
+			switch checkTime(meet) {
+			case 1: {
+				if len(currentMeet.Name) == 0 {
+					currentMeet = meet
+				} else {
+					todayList = append(todayList, meet)
+				}
+			}
 			case 2: todayList = append(todayList, meet)
-			}*/
+			}
 		}
+	}
+	fmt.Println("進行中または直前の会議:")
+	fmt.Println(currentMeet.Name, currentMeet.Url)
+	fmt.Println(currentMeet.STime, " - ", currentMeet.ETime + "\n")
+	fmt.Println("今日これから予定されている会議")
+	for _, meet := range todayList {
+		fmt.Println(meet.Name, meet.Url)
+		fmt.Println(meet.STime, " - ", meet.ETime + "\n")
 	}
 }
 
