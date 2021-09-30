@@ -36,7 +36,7 @@ func CreateUser(user string) {
 	defer func(db *sqlx.DB) {
 		err := db.Close()
 		if err != nil {
-			log.Fatalln()
+			log.Fatalln("getDB:", err)
 		}
 	}(db)
 
@@ -55,7 +55,7 @@ func CreateUser(user string) {
 	tx.MustExec(schema)
 	err := tx.Commit()
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("CreateUser:", err)
 	}
 }
 
@@ -64,7 +64,7 @@ func MakeMeet(name string, meet Meet) {
 	defer func(db *sqlx.DB) {
 		err := db.Close()
 		if err != nil {
-			log.Fatalln()
+			log.Fatalln(err)
 		}
 	}(db)
 
@@ -79,7 +79,7 @@ func MakeMeet(name string, meet Meet) {
 			"VALUE (:dispose, :meet_name, :url, :day_of_week, :start_time, :end_time)", meet)
 	}
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("MakeMeet:", err)
 	}
 }
 
@@ -88,14 +88,14 @@ func GetMeets(user string) []Meet {
 	defer func(db *sqlx.DB) {
 		err := db.Close()
 		if err != nil {
-			log.Fatalln()
+			log.Fatalln(err)
 		}
 	}(db)
 	
 	var meetList []Meet
 	err := db.Select(&meetList, "SELECT * FROM " + user + " ORDER BY dispose DESC, meet_date, day_of_week")
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("GetMeets:", err)
 		return nil
 	}
 	return meetList
@@ -106,7 +106,7 @@ func GetMeetsWithOpts(user string, mode int) []Meet {
 	defer func(db *sqlx.DB) {
 		err := db.Close()
 		if err != nil {
-			log.Fatalln()
+			log.Fatalln(err)
 		}
 	}(db)
 
@@ -119,7 +119,7 @@ func GetMeetsWithOpts(user string, mode int) []Meet {
 	}
 
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("GetMeetsWithOpts:", err)
 		return nil
 	}
 	return meetList
@@ -130,14 +130,14 @@ func GetMeet(user string, name string) Meet {
 	defer func(db *sqlx.DB) {
 		err := db.Close()
 		if err != nil {
-			log.Fatalln()
+			log.Fatalln(err)
 		}
 	}(db)
 
 	meet := Meet{}
 	err := db.Get(&meet, "SELECT * FROM " + user + " WHERE meet_name=?", name)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("GetMeet:", err)
 	}
 	fmt.Println(meet)
 	return meet
@@ -148,7 +148,7 @@ func UpdateMeet(user string, meet Meet) {
 	defer func(db *sqlx.DB) {
 		err := db.Close()
 		if err != nil {
-			log.Fatalln()
+			log.Fatalln(err)
 		}
 	}(db)
 
@@ -169,7 +169,7 @@ func UpdateMeet(user string, meet Meet) {
 	tx.MustExec("UPDATE " + user + " SET dispose=? WHERE id='" + id + "'", meet.Dispose)
 	err := tx.Commit()
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("UpdateMeet:", err)
 		return
 	}
 	fmt.Println(meet)
@@ -180,12 +180,12 @@ func DeleteMeet(user string, meetName string) {
 	defer func(db *sqlx.DB) {
 		err := db.Close()
 		if err != nil {
-			log.Fatalln()
+			log.Fatalln(err)
 		}
 	}(db)
 
 	_, err := db.Queryx("DELETE FROM " + user + " WHERE meet_name=? LIMIT 1", meetName)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("DeleteMeet:", err)
 	}
 }
