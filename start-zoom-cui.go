@@ -174,9 +174,12 @@ func startMeet(opts Option) {
 		}
 	}
 	fmt.Println("進行中または直前の会議:")
-	fmt.Println(currentMeet.Name, currentMeet.Url)
-	fmt.Println(currentMeet.STime, " - ", currentMeet.ETime + "\n")
-	fmt.Println("今日これから予定されている会議")
+	if len(currentMeet.Name) != 0 {
+		fmt.Println(currentMeet.Name, currentMeet.Url)
+		fmt.Println(currentMeet.STime, " - ", currentMeet.ETime + "\n")
+	}
+
+	fmt.Println("\n今日これから予定されている会議:")
 	for _, meet := range todayList {
 		fmt.Println(meet.Name, meet.Url)
 		fmt.Println(meet.STime, " - ", meet.ETime + "\n")
