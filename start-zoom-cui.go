@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"start-zoom-cui/repository"
+	"strconv"
 	"time"
 )
 
@@ -129,6 +130,16 @@ func showList() {
 }
 
 func checkTime(meet repository.Meet) int {
+	now := time.Now()
+	nowTime, _ := time.Parse("15:4", strconv.Itoa(now.Hour()) + ":" + strconv.Itoa(now.Minute()))
+	startTime, _ := time.Parse("15:04:05", meet.STime)
+	startTime = startTime.Add(-20 * time.Minute)
+	endTime, _ := time.Parse("15:04:05", meet.ETime)
+	if startTime.Before(nowTime) && endTime.After(nowTime) {
+		return 1
+	} else if startTime.After(nowTime) {
+		return 2
+	}
 	return 0
 }
 
@@ -140,17 +151,17 @@ func startMeet(opts Option) {
 
 	proc := func (
 		meet repository.Meet,
-		currentMeet repository.Meet,
-		todayList []repository.Meet) {
+		currentMeet *repository.Meet,
+		todayList *[]repository.Meet) {
 		switch checkTime(meet) {
 		case 1: {
 			if len(currentMeet.Name) == 0 {
-				currentMeet = meet
+				*currentMeet = meet
 			} else {
-				todayList = append(todayList, meet)
+				*todayList = append(*todayList, meet)
 			}
 		}
-		case 2: todayList = append(todayList, meet)
+		case 2: *todayList = append(*todayList, meet)
 		}
 	}
 
@@ -161,28 +172,28 @@ func startMeet(opts Option) {
 			log.Fatalln(err)
 		}
 		if year == meetDate.Year() && month == meetDate.Month() && day == meetDate.Day() {
-			fmt.Println(meet.Name)
-			proc(meet, currentMeet, todayList)
+			proc(meet, &currentMeet, &todayList)
 		}
 	}
 
 	meetList = repository.GetMeetsWithOpts(opts.User, 1)
 	for _, meet := range meetList {
 		if now.Weekday().String() == meet.Day.String {
-			fmt.Println(meet.Name)
-			proc(meet, currentMeet, todayList)
+			proc(meet, &currentMeet, &todayList)
 		}
 	}
 	fmt.Println("進行中または直前の会議:")
 	if len(currentMeet.Name) != 0 {
-		fmt.Println(currentMeet.Name, currentMeet.Url)
-		fmt.Println(currentMeet.STime, " - ", currentMeet.ETime + "\n")
+		fmt.Println(" -", currentMeet.Name, currentMeet.Url)
+		fmt.Println("   ", currentMeet.STime, "-", currentMeet.ETime + "\n")
 	}
 
-	fmt.Println("\n今日これから予定されている会議:")
+	fmt.Println("------------------------------")
+
+	fmt.Println("今日これから予定されている会議:")
 	for _, meet := range todayList {
-		fmt.Println(meet.Name, meet.Url)
-		fmt.Println(meet.STime, " - ", meet.ETime + "\n")
+		fmt.Println(" -", meet.Name, meet.Url)
+		fmt.Println("   ", meet.STime, "-", meet.ETime + "\n")
 	}
 }
 
