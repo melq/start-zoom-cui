@@ -87,28 +87,6 @@ func main() {
 
 func makeMeet(opts Option, meet repository.Meet) {
 	repository.MakeMeet(opts.User, meet)
-
-	/*for i := 0; i < 3; i++ { // TEST
-		repository.MakeMeet(opts.User, repository.Meet{
-			Dispose:	false,
-			Name:    	"test" + strconv.Itoa(i),
-			Url:     	"example.com" + "/" + strconv.Itoa(i),
-			Day:     	sql.NullString{String: "Sunday", Valid: true},
-			Date:    	sql.NullString{Valid: false},
-			STime:   	fmt.Sprintf("%06d", 150500 + i),
-			ETime:		fmt.Sprintf("%06d", 173000 + i),
-		})
-
-		repository.MakeMeet(opts.User, repository.Meet{
-			Dispose:	true,
-			Name:		"test" + strconv.Itoa(-i),
-			Url:		"example.com" + "/" + strconv.Itoa(-i),
-			Day:		sql.NullString{Valid: false},
-			Date:		sql.NullString{String: strconv.Itoa(210916 - i), Valid: true},
-			STime:		fmt.Sprintf("%06d", 30500 + i),
-			ETime: 		fmt.Sprintf("%06d", 53000 + i),
-		})
-	}*/
 }
 
 func showList() {
