@@ -43,6 +43,10 @@ func main() {
 		fmt.Println("Register", opts.User)
 		repository.CreateUser(opts.User)
 
+	} else if opts.Start {
+		fmt.Println("Start", opts.User)
+		startMeet(opts)
+
 	} else if opts.Make {
 		fmt.Println("Make", opts.User)
 		meet := repository.Meet{
@@ -63,10 +67,6 @@ func main() {
 		fmt.Println("List", opts.User)
 		showList()
 
-	} else if opts.Start {
-		fmt.Println("Start", opts.User)
-		startMeet(opts)
-
 	} else if opts.Edit {
 		fmt.Println("Edit", opts.User)
 		editMeet(opts)
@@ -80,11 +80,8 @@ func main() {
 		// 設定変更機能
 
 	} else {
-		//flags.NewParser(&opts, flags.Default).WriteHelp(os.Stdout)
-		//os.Exit(0)
-		fmt.Println(time.Now().String())
-		date, _ := time.Parse("2006-01-02", "2021-09-14 JST")
-		fmt.Println(date)
+		flags.NewParser(&opts, flags.Default).WriteHelp(os.Stdout)
+		os.Exit(0)
 	}
 }
 
