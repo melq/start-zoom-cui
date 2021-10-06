@@ -10,7 +10,15 @@ import (
 	"strconv"
 )
 
-type Bit int
+var DayOfWeekString = [7]string{
+	"Sunday",
+	"Monday",
+	"Tuesday",
+	"Wednesday",
+	"Thursday",
+	"Friday",
+	"Saturday",
+}
 
 type Meet struct {
 	Id		int				`db:"id"`
