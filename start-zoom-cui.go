@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/jessevdk/go-flags"
-	"github.com/jmoiron/sqlx/types"
 	"log"
 	"os"
 	"start-zoom-cui/repository"
@@ -78,21 +77,21 @@ func createUser(opts Option) {
 }
 
 func makeMeet(opts Option) {
-	meet := repository.Meet{
-		Dispose: types.BitBool(opts.Dispose),
-		Name: opts.Name,
-		Url: opts.Url,
-		STime: opts.STime,
-		ETime: opts.ETime,
-	}
-	if meet.Dispose {
-		meet.Date = sql.NullString{String: opts.Date, Valid: true}
-	} else {
-		meet.Day = sql.NullString{String: opts.Day, Valid: true}
-	}
-	repository.MakeMeet(opts.User, meet)
+	//meet := repository.Meet{
+	//	Dispose: types.BitBool(opts.Dispose),
+	//	Name: opts.Name,
+	//	Url: opts.Url,
+	//	STime: opts.STime,
+	//	ETime: opts.ETime,
+	//}
+	//if meet.Dispose {
+	//	meet.Date = sql.NullString{String: opts.Date, Valid: true}
+	//} else {
+	//	meet.Day = sql.NullString{String: opts.Day, Valid: true}
+	//}
+	//repository.MakeMeet(opts.User, meet)
 
-	/*nameA := []string{"Apple", "Ball", "Chair", "Diary", "Egg", "Floor", "Guitar"}
+	nameA := []string{"Apple", "Ball", "Chair", "Diary", "Egg", "Floor", "Guitar"}
 	nameB := []string{"A", "B", "C", "D", "E", "F", "G"}
 
 	for i, v := range nameA {
@@ -118,7 +117,7 @@ func makeMeet(opts Option) {
 			ETime: strconv.Itoa(173000 + i),
 		}
 		repository.MakeMeet(opts.User, meet)
-	}*/
+	}
 }
 
 func showList() {
