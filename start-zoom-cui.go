@@ -123,14 +123,14 @@ func makeMeet(opts Option) {
 func showList() {
 	meetList := repository.GetMeets(opts.User)
 	for _, meet := range meetList {
-		fmt.Println("会議名: " + meet.Name)
-		fmt.Println("URL: " + meet.Url)
+		fmt.Println("- 会議名:", meet.Name)
+		fmt.Println("  URL:", meet.Url)
 		if meet.Dispose {
-			fmt.Print("日時: " + meet.Date.String)
+			fmt.Println("  日時:", meet.Date.String)
 		} else {
-			fmt.Print("曜日: " + meet.Day.String)
+			fmt.Println("  曜日:", meet.Day.String)
 		}
-		fmt.Print(" " + meet.STime + " - ")
+		fmt.Print("  時刻: " + meet.STime + " - ")
 		fmt.Println(meet.ETime + "\n")
 	}
 }
