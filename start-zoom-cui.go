@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/jessevdk/go-flags"
+	"github.com/jmoiron/sqlx/types"
 	"log"
 	"os"
 	"start-zoom-cui/repository"
@@ -24,8 +25,8 @@ type Option struct {
 	Dispose bool	`long:"dispose" description:"一度のみの会議の場合指定します"`
 	Name string		`long:"name" description:"会議の名前を入力します"`
 	Url string		`long:"url" description:"会議のURLを入力します"`
-	Day string		`long:"day" description:"定期的な会議の場合、その曜日を入力します(形式: Sunday, Monday..)"`
-	Date string		`long:"date" description:"定期的でない単発の会議の場合、その日付を入力します(形式: 2021年9月20日 -> 210920)"`
+	Day string		`long:"day" description:"定期的な会議の曜日を入力します(形式: Sunday, Monday..)"`
+	Date string		`long:"date" description:"定期的でない会議の日付を入力します(形式: 2021年9月20日 -> 210920)"`
 	STime string	`long:"stime" description:"会議の開始時刻を入力します(形式: 15:00:00 -> 150000)"`
 	ETime string	`long:"etime" description:"会議の開始時刻を入力します(形式: 15:00:00 -> 150000)"`
 }
@@ -77,47 +78,47 @@ func createUser(opts Option) {
 }
 
 func makeMeet(opts Option) {
-	//meet := repository.Meet{
-	//	Dispose: types.BitBool(opts.Dispose),
-	//	Name: opts.Name,
-	//	Url: opts.Url,
-	//	STime: opts.STime,
-	//	ETime: opts.ETime,
-	//}
-	//if meet.Dispose {
-	//	meet.Date = sql.NullString{String: opts.Date, Valid: true}
-	//} else {
-	//	meet.Day = sql.NullString{String: opts.Day, Valid: true}
-	//}
-	//repository.MakeMeet(opts.User, meet)
-
-	nameA := []string{"Apple", "Ball", "Chair", "Diary", "Egg", "Floor", "Guitar"}
-	nameB := []string{"A", "B", "C", "D", "E", "F", "G"}
-
-	for i, v := range nameA {
-		meet := repository.Meet{
-			Dispose: false,
-			Name: v,
-			Url: "example.com/A/" + strconv.Itoa(i),
-			Day: sql.NullString{String: repository.DayOfWeekString[i], Valid: true},
-			Date: sql.NullString{Valid: false},
-			STime: strconv.Itoa(150000 + i),
-			ETime: strconv.Itoa(153000 + i),
-		}
-		repository.MakeMeet(opts.User, meet)
+	meet := repository.Meet{
+		Dispose: types.BitBool(opts.Dispose),
+		Name: opts.Name,
+		Url: opts.Url,
+		STime: opts.STime,
+		ETime: opts.ETime,
 	}
-	for i, v := range nameB {
-		meet := repository.Meet{
-			Dispose: false,
-			Name: v,
-			Url: "example.com/B/" + strconv.Itoa(i),
-			Day: sql.NullString{Valid: false},
-			Date: sql.NullString{String: strconv.Itoa(20211006 + i), Valid: true},
-			STime: strconv.Itoa(170000 + i),
-			ETime: strconv.Itoa(173000 + i),
-		}
-		repository.MakeMeet(opts.User, meet)
+	if meet.Dispose {
+		meet.Date = sql.NullString{String: opts.Date, Valid: true}
+	} else {
+		meet.Day = sql.NullString{String: opts.Day, Valid: true}
 	}
+	repository.MakeMeet(opts.User, meet)
+
+	//nameA := []string{"Apple", "Ball", "Chair", "Diary", "Egg", "Floor", "Guitar"}
+	//nameB := []string{"Hint", "Idea", "Joke", "Kanji", "Limb", "Model", "Nuke"}
+	//
+	//for i, v := range nameA {
+	//	meet := repository.Meet{
+	//		Dispose: false,
+	//		Name: v,
+	//		Url: "example.com/A/" + strconv.Itoa(i),
+	//		Day: sql.NullString{String: repository.DayOfWeekString[i], Valid: true},
+	//		Date: sql.NullString{Valid: false},
+	//		STime: strconv.Itoa(150000 + i),
+	//		ETime: strconv.Itoa(153000 + i),
+	//	}
+	//	repository.MakeMeet(opts.User, meet)
+	//}
+	//for i, v := range nameB {
+	//	meet := repository.Meet{
+	//		Dispose: true,
+	//		Name: v,
+	//		Url: "example.com/B/" + strconv.Itoa(i),
+	//		Day: sql.NullString{Valid: false},
+	//		Date: sql.NullString{String: strconv.Itoa(20211006 + i), Valid: true},
+	//		STime: strconv.Itoa(170000 + i),
+	//		ETime: strconv.Itoa(173000 + i),
+	//	}
+	//	repository.MakeMeet(opts.User, meet)
+	//}
 }
 
 func showList() {

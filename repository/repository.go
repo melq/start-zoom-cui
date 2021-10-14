@@ -78,12 +78,12 @@ func MakeMeet(name string, meet Meet) {
 
 	var err error
 	if meet.Dispose {
-		_, err = db.NamedExec("INSERT INTO "+name+
-			"(dispose, meet_name, url, meet_date, start_time, end_time)"+
+		_, err = db.NamedExec("INSERT INTO " + name +
+			"(dispose, meet_name, url, meet_date, start_time, end_time)" +
 			"VALUE (:dispose, :meet_name, :url, :meet_date, :start_time, :end_time)", meet)
 	} else {
-		_, err = db.NamedExec("INSERT INTO "+name+
-			"(dispose, meet_name, url, day_of_week, start_time, end_time)"+
+		_, err = db.NamedExec("INSERT INTO " + name +
+			"(dispose, meet_name, url, day_of_week, start_time, end_time)" +
 			"VALUE (:dispose, :meet_name, :url, :day_of_week, :start_time, :end_time)", meet)
 	}
 	if err != nil {
