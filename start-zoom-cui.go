@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/jessevdk/go-flags"
+	"github.com/jmoiron/sqlx/types"
 	"log"
 	"os"
 	"start-zoom-cui/repository"
@@ -77,47 +78,47 @@ func createUser(opts Option) {
 }
 
 func makeMeet(opts Option) {
-	//meet := repository.Meet{
-	//	Weekly: types.BitBool(opts.Weekly),
-	//	Name:   opts.Name,
-	//	Url:    opts.Url,
-	//	STime:  opts.STime,
-	//	ETime:  opts.ETime,
-	//}
-	//if meet.Weekly {
-	//	meet.Day = sql.NullString{String: opts.Day, Valid: true}
-	//} else {
-	//	meet.Date = sql.NullString{String: opts.Date, Valid: true}
-	//}
-	//repository.MakeMeet(opts.User, meet)
-
-	nameA := []string{"Apple", "Ball", "Chair", "Diary", "Egg", "Floor", "Guitar"}
-	nameB := []string{"Hint", "Idea", "Joke", "Kanji", "Limb", "Model", "Nuke"}
-
-	for i, v := range nameA {
-		meet := repository.Meet{
-			Weekly: true,
-			Name: v,
-			Url: "example.com/A/" + strconv.Itoa(i),
-			Day: sql.NullString{String: repository.DayOfWeekString[i], Valid: true},
-			Date: sql.NullString{Valid: false},
-			STime: strconv.Itoa(150000 + i),
-			ETime: strconv.Itoa(153000 + i),
-		}
-		repository.MakeMeet(opts.User, meet)
+	meet := repository.Meet{
+		Weekly: types.BitBool(opts.Weekly),
+		Name:   opts.Name,
+		Url:    opts.Url,
+		STime:  opts.STime,
+		ETime:  opts.ETime,
 	}
-	for i, v := range nameB {
-		meet := repository.Meet{
-			Weekly: false,
-			Name: v,
-			Url: "example.com/B/" + strconv.Itoa(i),
-			Day: sql.NullString{Valid: false},
-			Date: sql.NullString{String: strconv.Itoa(20211006 + i), Valid: true},
-			STime: strconv.Itoa(170000 + i),
-			ETime: strconv.Itoa(173000 + i),
-		}
-		repository.MakeMeet(opts.User, meet)
+	if meet.Weekly {
+		meet.Day = sql.NullString{String: opts.Day, Valid: true}
+	} else {
+		meet.Date = sql.NullString{String: opts.Date, Valid: true}
 	}
+	repository.MakeMeet(opts.User, meet)
+
+	//nameA := []string{"Apple", "Ball", "Chair", "Diary", "Egg", "Floor", "Guitar"}
+	//nameB := []string{"Hint", "Idea", "Joke", "Kanji", "Limb", "Model", "Nuke"}
+	//
+	//for i, v := range nameA {
+	//	meet := repository.Meet{
+	//		Weekly: true,
+	//		Name: v,
+	//		Url: "example.com/A/" + strconv.Itoa(i),
+	//		Day: sql.NullString{String: repository.DayOfWeekString[i], Valid: true},
+	//		Date: sql.NullString{Valid: false},
+	//		STime: strconv.Itoa(150000 + i),
+	//		ETime: strconv.Itoa(153000 + i),
+	//	}
+	//	repository.MakeMeet(opts.User, meet)
+	//}
+	//for i, v := range nameB {
+	//	meet := repository.Meet{
+	//		Weekly: false,
+	//		Name: v,
+	//		Url: "example.com/B/" + strconv.Itoa(i),
+	//		Day: sql.NullString{Valid: false},
+	//		Date: sql.NullString{String: strconv.Itoa(20211006 + i), Valid: true},
+	//		STime: strconv.Itoa(170000 + i),
+	//		ETime: strconv.Itoa(173000 + i),
+	//	}
+	//	repository.MakeMeet(opts.User, meet)
+	//}
 }
 
 func showList() {
