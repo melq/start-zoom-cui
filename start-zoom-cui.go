@@ -40,27 +40,21 @@ func main() {
 	}
 
 	if opts.Register {
-		fmt.Println("Register", opts.User)
 		createUser(opts)
 
 	} else if opts.Start {
-		fmt.Println("Start", opts.User)
 		startMeet(opts)
 
 	} else if opts.Make {
-		fmt.Println("Make", opts.User)
 		makeMeet(opts) // 情報入力の仕様要検討
 
 	} else if opts.List {
-		fmt.Println("List", opts.User)
 		showList()
 
 	} else if opts.Edit {
-		fmt.Println("Edit", opts.User)
 		editMeet(opts)
 
 	} else if opts.Delete {
-		fmt.Println("Delete", opts.User)
 		deleteMeet(opts)
 
 	} else if opts.Setting {
@@ -91,6 +85,10 @@ func makeMeet(opts Option) {
 		meet.Date = sql.NullString{String: opts.Date, Valid: true}
 	}
 	repository.MakeMeet(opts.User, meet)
+
+	meet = repository.GetMeet(opts.User, opts.Name)
+	fmt.Println("以下の会議を作成しました:")
+	showMeetData(meet)
 
 	//nameA := []string{"Apple", "Ball", "Chair", "Diary", "Egg", "Floor", "Guitar"}
 	//nameB := []string{"Hint", "Idea", "Joke", "Kanji", "Limb", "Model", "Nuke"}
@@ -138,6 +136,7 @@ func showList() {
 
 func checkTime(meet repository.Meet) int {
 	now := time.Now()
+	now = now.In(time.FixedZone("Asia/Tokyo", 9*60*60))
 	nowTime, _ := time.Parse("15:4", strconv.Itoa(now.Hour()) + ":" + strconv.Itoa(now.Minute()))
 	startTime, _ := time.Parse("15:04:05", meet.STime)
 	startTime = startTime.Add(-20 * time.Minute)
@@ -152,6 +151,7 @@ func checkTime(meet repository.Meet) int {
 
 func startMeet(opts Option) {
 	now := time.Now()
+	now = now.In(time.FixedZone("Asia/Tokyo", 9*60*60))
 	year, month, day := now.Date()
 	var currentMeet repository.Meet
 	var todayList []repository.Meet
@@ -220,8 +220,24 @@ func editMeet(opts Option) {
 	if opts.STime != "" { meet.STime = opts.STime }
 	if opts.ETime != "" { meet.ETime = opts.ETime }
 	repository.UpdateMeet(opts.User, meet)
+
+	meet = repository.GetMeet(opts.User, opts.Name)
+	fmt.Println("以下のように会議を編集しました")
+	showMeetData(meet)
 }
 
 func deleteMeet(opts Option) {
 	repository.DeleteMeet(opts.User, opts.Name)
+}
+
+func showMeetData(meet repository.Meet) {
+	fmt.Println("- 会議名:", meet.Name)
+	fmt.Println("  URL:", meet.Url)
+	if meet.Weekly {
+		fmt.Println("  曜日:", meet.Day.String)
+	} else {
+		fmt.Println("  日時:", meet.Date.String)
+	}
+	fmt.Print("  時刻: " + meet.STime + " - ")
+	fmt.Println(meet.ETime + "\n")
 }
