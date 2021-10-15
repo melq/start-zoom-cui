@@ -122,15 +122,7 @@ func makeMeet(opts Option) {
 func showList() {
 	meetList := repository.GetMeets(opts.User)
 	for _, meet := range meetList {
-		fmt.Println("- 会議名:", meet.Name)
-		fmt.Println("  URL:", meet.Url)
-		if meet.Weekly {
-			fmt.Println("  曜日:", meet.Day.String)
-		} else {
-			fmt.Println("  日時:", meet.Date.String)
-		}
-		fmt.Print("  時刻: " + meet.STime + " - ")
-		fmt.Println(meet.ETime + "\n")
+		showMeetData(meet)
 	}
 }
 
@@ -191,16 +183,14 @@ func startMeet(opts Option) {
 
 	fmt.Println("\n進行中または直前の会議:")
 	if len(currentMeet.Name) != 0 {
-		fmt.Println(" -", currentMeet.Name, currentMeet.Url)
-		fmt.Println("   ", currentMeet.STime, "-", currentMeet.ETime + "\n")
+		showMeetData(currentMeet)
 	}
 
 	fmt.Println("------------------------------")
 
 	fmt.Println("\n今日これから予定されている会議:")
 	for _, meet := range todayList {
-		fmt.Println(" -", meet.Name, meet.Url)
-		fmt.Println("   ", meet.STime, "-", meet.ETime + "\n")
+		showMeetData(meet)
 	}
 }
 
