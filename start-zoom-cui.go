@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/jessevdk/go-flags"
-	"github.com/jmoiron/sqlx/types"
 	"log"
 	"os"
 	"start-zoom-cui/repository"
@@ -22,8 +21,8 @@ type Option struct {
 	Setting bool	`long:"setting" description:"設定を行います"`
 	User string		`short:"u" description:"ユーザ名を入力します"`
 
-	Dispose bool	`long:"dispose" description:"一度のみの会議の場合指定します"`
-	Name string		`long:"name" description:"会議の名前を入力します"`
+	Weekly bool   `long:"weekly" description:"一度のみの会議の場合指定します"`
+	Name   string `long:"name" description:"会議の名前を入力します"`
 	Url string		`long:"url" description:"会議のURLを入力します"`
 	Day string		`long:"day" description:"定期的な会議の曜日を入力します(形式: Sunday, Monday..)"`
 	Date string		`long:"date" description:"定期的でない会議の日付を入力します(形式: 2021年9月20日 -> 210920)"`
@@ -78,47 +77,47 @@ func createUser(opts Option) {
 }
 
 func makeMeet(opts Option) {
-	meet := repository.Meet{
-		Dispose: types.BitBool(opts.Dispose),
-		Name: opts.Name,
-		Url: opts.Url,
-		STime: opts.STime,
-		ETime: opts.ETime,
-	}
-	if meet.Dispose {
-		meet.Date = sql.NullString{String: opts.Date, Valid: true}
-	} else {
-		meet.Day = sql.NullString{String: opts.Day, Valid: true}
-	}
-	repository.MakeMeet(opts.User, meet)
+	//meet := repository.Meet{
+	//	Weekly: types.BitBool(opts.Weekly),
+	//	Name:   opts.Name,
+	//	Url:    opts.Url,
+	//	STime:  opts.STime,
+	//	ETime:  opts.ETime,
+	//}
+	//if meet.Weekly {
+	//	meet.Day = sql.NullString{String: opts.Day, Valid: true}
+	//} else {
+	//	meet.Date = sql.NullString{String: opts.Date, Valid: true}
+	//}
+	//repository.MakeMeet(opts.User, meet)
 
-	//nameA := []string{"Apple", "Ball", "Chair", "Diary", "Egg", "Floor", "Guitar"}
-	//nameB := []string{"Hint", "Idea", "Joke", "Kanji", "Limb", "Model", "Nuke"}
-	//
-	//for i, v := range nameA {
-	//	meet := repository.Meet{
-	//		Dispose: false,
-	//		Name: v,
-	//		Url: "example.com/A/" + strconv.Itoa(i),
-	//		Day: sql.NullString{String: repository.DayOfWeekString[i], Valid: true},
-	//		Date: sql.NullString{Valid: false},
-	//		STime: strconv.Itoa(150000 + i),
-	//		ETime: strconv.Itoa(153000 + i),
-	//	}
-	//	repository.MakeMeet(opts.User, meet)
-	//}
-	//for i, v := range nameB {
-	//	meet := repository.Meet{
-	//		Dispose: true,
-	//		Name: v,
-	//		Url: "example.com/B/" + strconv.Itoa(i),
-	//		Day: sql.NullString{Valid: false},
-	//		Date: sql.NullString{String: strconv.Itoa(20211006 + i), Valid: true},
-	//		STime: strconv.Itoa(170000 + i),
-	//		ETime: strconv.Itoa(173000 + i),
-	//	}
-	//	repository.MakeMeet(opts.User, meet)
-	//}
+	nameA := []string{"Apple", "Ball", "Chair", "Diary", "Egg", "Floor", "Guitar"}
+	nameB := []string{"Hint", "Idea", "Joke", "Kanji", "Limb", "Model", "Nuke"}
+
+	for i, v := range nameA {
+		meet := repository.Meet{
+			Weekly: true,
+			Name: v,
+			Url: "example.com/A/" + strconv.Itoa(i),
+			Day: sql.NullString{String: repository.DayOfWeekString[i], Valid: true},
+			Date: sql.NullString{Valid: false},
+			STime: strconv.Itoa(150000 + i),
+			ETime: strconv.Itoa(153000 + i),
+		}
+		repository.MakeMeet(opts.User, meet)
+	}
+	for i, v := range nameB {
+		meet := repository.Meet{
+			Weekly: false,
+			Name: v,
+			Url: "example.com/B/" + strconv.Itoa(i),
+			Day: sql.NullString{Valid: false},
+			Date: sql.NullString{String: strconv.Itoa(20211006 + i), Valid: true},
+			STime: strconv.Itoa(170000 + i),
+			ETime: strconv.Itoa(173000 + i),
+		}
+		repository.MakeMeet(opts.User, meet)
+	}
 }
 
 func showList() {
@@ -126,10 +125,10 @@ func showList() {
 	for _, meet := range meetList {
 		fmt.Println("- 会議名:", meet.Name)
 		fmt.Println("  URL:", meet.Url)
-		if meet.Dispose {
-			fmt.Println("  日時:", meet.Date.String)
-		} else {
+		if meet.Weekly {
 			fmt.Println("  曜日:", meet.Day.String)
+		} else {
+			fmt.Println("  日時:", meet.Date.String)
 		}
 		fmt.Print("  時刻: " + meet.STime + " - ")
 		fmt.Println(meet.ETime + "\n")
@@ -209,12 +208,12 @@ func editMeet(opts Option) {
 	if opts.Url != "" { meet.Url = opts.Url }
 	if len(opts.Day) > 0 {
 		meet.Day = sql.NullString{ String: opts.Day, Valid: true }
-		meet.Dispose = false
+		meet.Weekly = true
 		meet.Date.Valid = false
 	}
 	if len(opts.Date) > 0 { // 曜日よりも日付指定を優先するので、こちらが後
 		meet.Date = sql.NullString{ String: opts.Date, Valid: true }
-		meet.Dispose = true
+		meet.Weekly = false
 		meet.Day.Valid = false
 	}
 	if opts.STime != "" { meet.STime = opts.STime }
