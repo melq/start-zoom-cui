@@ -172,14 +172,7 @@ func startMeet(opts Option) {
 		}
 	}
 
-	meetList := repository.GetMeetsWithOpts(opts.User, 0)
-	for _, meet := range meetList {
-		if now.Weekday().String() == meet.Day.String {
-			proc(meet, &currentMeet, &todayList)
-		}
-	}
-
-	meetList = repository.GetMeetsWithOpts(opts.User, 1)
+	meetList := repository.GetMeetsWithOpts(opts.User, 1)
 	for _, meet := range meetList {
 		meetDate, err := time.Parse("2006-01-02", meet.Date.String)
 		if err != nil {
@@ -189,6 +182,13 @@ func startMeet(opts Option) {
 			proc(meet, &currentMeet, &todayList)
 		}
 	}
+	meetList = repository.GetMeetsWithOpts(opts.User, 0)
+	for _, meet := range meetList {
+		if now.Weekday().String() == meet.Day.String {
+			proc(meet, &currentMeet, &todayList)
+		}
+	}
+
 	fmt.Println("\n進行中または直前の会議:")
 	if len(currentMeet.Name) != 0 {
 		fmt.Println(" -", currentMeet.Name, currentMeet.Url)
