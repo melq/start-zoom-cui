@@ -230,7 +230,7 @@ func showMeetData(meet repository.Meet) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		fmt.Println("  日時:", meet.Date.String, meetDate.Weekday()) //曜日表示も入れる
+		fmt.Println("  日時:", meet.Date.String, meetDate.Weekday())
 	}
 	fmt.Print("  時刻: " + meet.STime + " - ")
 	fmt.Println(meet.ETime + "\n")

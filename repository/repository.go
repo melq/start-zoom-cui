@@ -147,7 +147,6 @@ func GetMeet(user string, name string) Meet {
 	if err != nil {
 		log.Fatalln("GetMeet:", err)
 	}
-	fmt.Println(meet)
 	return meet
 }
 
