@@ -2,7 +2,6 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/types"
@@ -179,7 +178,6 @@ func UpdateMeet(user string, meet Meet) {
 		log.Fatalln("UpdateMeet:", err)
 		return
 	}
-	fmt.Println(meet)
 }
 
 func DeleteMeet(user string, meetName string) {
