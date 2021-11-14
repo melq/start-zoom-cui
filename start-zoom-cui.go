@@ -218,6 +218,7 @@ func editMeet(opts Option) {
 
 func deleteMeet(opts Option) {
 	repository.DeleteMeet(opts.User, opts.Name)
+	fmt.Println(opts.Name, "を削除しました")
 }
 
 func showMeetData(meet repository.Meet) {
