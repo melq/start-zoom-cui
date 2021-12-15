@@ -13,23 +13,24 @@ import (
 )
 
 type Option struct {
-	Register bool	`short:"r" long:"register" description:"アカウントを作成します"`
-	Start bool		`short:"s" long:"start" description:"近い会議を開始します"`
-	Make bool		`short:"m" long:"make" description:"会議の予定を作成します"`
-	List bool		`short:"l" long:"list" description:"登録されている会議の一覧を表示します"`
-	Edit bool		`short:"e" long:"edit" description:"登録されている会議の編集を行います"`
-	Delete bool		`short:"d" long:"delete" description:"登録されている会議の削除を行います"`
-	Setting bool	`long:"setting" description:"設定を行います"`
-	User string		`short:"u" description:"ユーザ名を入力します"`
+	Register bool   `short:"r" long:"register" description:"アカウントを作成します"`
+	Start    bool   `short:"s" long:"start" description:"近い会議を開始します"`
+	Make     bool   `short:"m" long:"make" description:"会議の予定を作成します"`
+	List     bool   `short:"l" long:"list" description:"登録されている会議の一覧を表示します"`
+	Edit     bool   `short:"e" long:"edit" description:"登録されている会議の編集を行います"`
+	Delete   bool   `short:"d" long:"delete" description:"登録されている会議の削除を行います"`
+	Setting  bool   `long:"setting" description:"設定を行います"`
+	User     string `short:"u" description:"ユーザ名を入力します"`
 
 	Weekly bool   `long:"weekly" description:"一度のみの会議の場合指定します"`
 	Name   string `long:"name" description:"会議の名前を入力します"`
-	Url string		`long:"url" description:"会議のURLを入力します"`
-	Day string		`long:"day" description:"定期的な会議の曜日を入力します(形式: Sunday, Monday..)"`
-	Date string		`long:"date" description:"定期的でない会議の日付を入力します(形式: 2021年9月20日 -> 210920)"`
-	STime string	`long:"stime" description:"会議の開始時刻を入力します(形式: 15:00:00 -> 150000)"`
-	ETime string	`long:"etime" description:"会議の開始時刻を入力します(形式: 15:00:00 -> 150000)"`
+	Url    string `long:"url" description:"会議のURLを入力します"`
+	Day    string `long:"day" description:"定期的な会議の曜日を入力します(形式: Sunday, Monday..)"`
+	Date   string `long:"date" description:"定期的でない会議の日付を入力します(形式: 2021年9月20日 -> 210920)"`
+	STime  string `long:"stime" description:"会議の開始時刻を入力します(形式: 15:00:00 -> 150000)"`
+	ETime  string `long:"etime" description:"会議の開始時刻を入力します(形式: 15:00:00 -> 150000)"`
 }
+
 var opts Option
 
 func main() {
@@ -68,7 +69,12 @@ func main() {
 }
 
 func createUser(opts Option) {
-	repository.CreateUser(opts.User)
+	res := repository.CreateUser(opts.User)
+	if res == 1 {
+		fmt.Println(opts.User, "を登録しました。")
+	} else if res == 0 {
+		fmt.Println("そのユーザー名はすでに使用されています。")
+	}
 }
 
 func makeMeet(opts Option) {
@@ -97,7 +103,7 @@ func makeMeet(opts Option) {
 	//	meet := repository.Meet{
 	//		Weekly: true,
 	//		Name: v,
-	//		Url: "example.com/A/" + strconv.Itoa(i),
+	//		Url: "http://example.com/A/" + strconv.Itoa(i),
 	//		Day: sql.NullString{String: repository.DayOfWeekString[i], Valid: true},
 	//		Date: sql.NullString{Valid: false},
 	//		STime: strconv.Itoa(150000 + i),
@@ -109,7 +115,7 @@ func makeMeet(opts Option) {
 	//	meet := repository.Meet{
 	//		Weekly: false,
 	//		Name: v,
-	//		Url: "example.com/B/" + strconv.Itoa(i),
+	//		Url: "http://example.com/B/" + strconv.Itoa(i),
 	//		Day: sql.NullString{Valid: false},
 	//		Date: sql.NullString{String: strconv.Itoa(20211006 + i), Valid: true},
 	//		STime: strconv.Itoa(170000 + i),
@@ -129,7 +135,7 @@ func showList() {
 func checkTime(meet repository.Meet) int {
 	now := time.Now()
 	now = now.In(time.FixedZone("Asia/Tokyo", 9*60*60))
-	nowTime, _ := time.Parse("15:4", strconv.Itoa(now.Hour()) + ":" + strconv.Itoa(now.Minute()))
+	nowTime, _ := time.Parse("15:4", strconv.Itoa(now.Hour())+":"+strconv.Itoa(now.Minute()))
 	startTime, _ := time.Parse("15:04:05", meet.STime)
 	startTime = startTime.Add(-20 * time.Minute)
 	endTime, _ := time.Parse("15:04:05", meet.ETime)
@@ -148,19 +154,21 @@ func startMeet(opts Option) {
 	var currentMeet repository.Meet
 	var todayList []repository.Meet
 
-	proc := func (
+	proc := func(
 		meet repository.Meet,
 		currentMeet *repository.Meet,
 		todayList *[]repository.Meet) {
 		switch checkTime(meet) {
-		case 1: {
-			if len(currentMeet.Name) == 0 {
-				*currentMeet = meet
-			} else {
-				*todayList = append(*todayList, meet)
+		case 1:
+			{
+				if len(currentMeet.Name) == 0 {
+					*currentMeet = meet
+				} else {
+					*todayList = append(*todayList, meet)
+				}
 			}
-		}
-		case 2: *todayList = append(*todayList, meet)
+		case 2:
+			*todayList = append(*todayList, meet)
 		}
 	}
 
@@ -196,19 +204,25 @@ func startMeet(opts Option) {
 
 func editMeet(opts Option) {
 	meet := repository.GetMeet(opts.User, opts.Name)
-	if opts.Url != "" { meet.Url = opts.Url }
+	if opts.Url != "" {
+		meet.Url = opts.Url
+	}
 	if len(opts.Day) > 0 {
-		meet.Day = sql.NullString{ String: opts.Day, Valid: true }
+		meet.Day = sql.NullString{String: opts.Day, Valid: true}
 		meet.Weekly = true
 		meet.Date.Valid = false
 	}
 	if len(opts.Date) > 0 { // 曜日よりも日付指定を優先するので、こちらが後
-		meet.Date = sql.NullString{ String: opts.Date, Valid: true }
+		meet.Date = sql.NullString{String: opts.Date, Valid: true}
 		meet.Weekly = false
 		meet.Day.Valid = false
 	}
-	if opts.STime != "" { meet.STime = opts.STime }
-	if opts.ETime != "" { meet.ETime = opts.ETime }
+	if opts.STime != "" {
+		meet.STime = opts.STime
+	}
+	if opts.ETime != "" {
+		meet.ETime = opts.ETime
+	}
 	repository.UpdateMeet(opts.User, meet)
 
 	meet = repository.GetMeet(opts.User, opts.Name)

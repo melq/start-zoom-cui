@@ -20,14 +20,14 @@ var DayOfWeekString = [7]string{
 }
 
 type Meet struct {
-	Id     int           `db:"id"`
-	Weekly types.BitBool `db:"weekly"`
-	Name   string        `db:"meet_name"`
-	Url 	string			`db:"url"`
-	Day 	sql.NullString 	`db:"day_of_week"`
-	Date 	sql.NullString	`db:"meet_date"`
-	STime 	string			`db:"start_time"`
-	ETime	string			`db:"end_time"`
+	Id     int            `db:"id"`
+	Weekly types.BitBool  `db:"weekly"`
+	Name   string         `db:"meet_name"`
+	Url    string         `db:"url"`
+	Day    sql.NullString `db:"day_of_week"`
+	Date   sql.NullString `db:"meet_date"`
+	STime  string         `db:"start_time"`
+	ETime  string         `db:"end_time"`
 }
 
 func getDB() *sqlx.DB {
@@ -38,7 +38,7 @@ func getDB() *sqlx.DB {
 	return db
 }
 
-func CreateUser(user string) {
+func CreateUser(user string) int {
 	db := getDB()
 	defer func(db *sqlx.DB) {
 		err := db.Close()
@@ -46,6 +46,22 @@ func CreateUser(user string) {
 			log.Fatalln("getDB:", err)
 		}
 	}(db)
+
+	type UserData struct {
+		Id   int    `db:"id"`
+		Name string `db:"name"`
+	}
+
+	var users []UserData
+	err := db.Select(&users, "SELECT * FROM users WHERE name=(?)", user)
+	if err != nil {
+		log.Fatalln("CreateUser/getUsers:", err)
+	}
+	for _, v := range users {
+		if v.Name == user {
+			return 0
+		}
+	}
 
 	var schema = "CREATE TABLE IF NOT EXISTS " + user + // ユーザ毎のテーブルを作成するクエリ
 		"(id int not null primary key auto_increment," +
@@ -60,10 +76,11 @@ func CreateUser(user string) {
 	tx := db.MustBegin()
 	tx.MustExec("INSERT INTO users (name) VALUES (?)", user)
 	tx.MustExec(schema)
-	err := tx.Commit()
+	err = tx.Commit()
 	if err != nil {
 		log.Fatalln("CreateUser:", err)
 	}
+	return 1
 }
 
 func MakeMeet(name string, meet Meet) {
@@ -77,12 +94,12 @@ func MakeMeet(name string, meet Meet) {
 
 	var err error
 	if meet.Weekly {
-		_, err = db.NamedExec("INSERT INTO " + name +
-			"(weekly, meet_name, url, day_of_week, start_time, end_time)" +
+		_, err = db.NamedExec("INSERT INTO "+name+
+			"(weekly, meet_name, url, day_of_week, start_time, end_time)"+
 			"VALUE (:weekly, :meet_name, :url, :day_of_week, :start_time, :end_time)", meet)
 	} else {
-		_, err = db.NamedExec("INSERT INTO " + name +
-			"(weekly, meet_name, url, meet_date, start_time, end_time)" +
+		_, err = db.NamedExec("INSERT INTO "+name+
+			"(weekly, meet_name, url, meet_date, start_time, end_time)"+
 			"VALUE (:weekly, :meet_name, :url, :meet_date, :start_time, :end_time)", meet)
 	}
 	if err != nil {
@@ -98,9 +115,9 @@ func GetMeets(user string) []Meet {
 			log.Fatalln(err)
 		}
 	}(db)
-	
+
 	var meetList []Meet
-	err := db.Select(&meetList, "SELECT * FROM " + user + " ORDER BY weekly DESC, meet_date, day_of_week")
+	err := db.Select(&meetList, "SELECT * FROM "+user+" ORDER BY weekly DESC, meet_date, day_of_week")
 	if err != nil {
 		log.Fatalln("GetMeets:", err)
 		return nil
@@ -120,9 +137,9 @@ func GetMeetsWithOpts(user string, mode int) []Meet {
 	var meetList []Meet
 	var err error
 	if mode == 0 {
-		err = db.Select(&meetList, "SELECT * FROM " + user + " WHERE weekly=true ORDER BY weekly DESC, meet_date, start_time")
+		err = db.Select(&meetList, "SELECT * FROM "+user+" WHERE weekly=true ORDER BY weekly DESC, meet_date, start_time")
 	} else {
-		err = db.Select(&meetList, "SELECT * FROM " + user + " WHERE weekly=false ORDER BY weekly DESC, day_of_week, start_time")
+		err = db.Select(&meetList, "SELECT * FROM "+user+" WHERE weekly=false ORDER BY weekly DESC, day_of_week, start_time")
 	}
 
 	if err != nil {
@@ -142,7 +159,7 @@ func GetMeet(user string, name string) Meet {
 	}(db)
 
 	meet := Meet{}
-	err := db.Get(&meet, "SELECT * FROM " + user + " WHERE meet_name=?", name)
+	err := db.Get(&meet, "SELECT * FROM "+user+" WHERE meet_name=?", name)
 	if err != nil {
 		log.Fatalln("GetMeet:", err)
 	}
@@ -160,19 +177,19 @@ func UpdateMeet(user string, meet Meet) {
 
 	id := strconv.Itoa(meet.Id)
 	tx := db.MustBegin()
-	tx.MustExec("UPDATE " + user + " SET meet_name=? WHERE id='" + id + "'", meet.Name)
-	tx.MustExec("UPDATE " + user + " SET url=? WHERE id='" + id + "'", meet.Url)
+	tx.MustExec("UPDATE "+user+" SET meet_name=? WHERE id='"+id+"'", meet.Name)
+	tx.MustExec("UPDATE "+user+" SET url=? WHERE id='"+id+"'", meet.Url)
 	if meet.Day.Valid == true {
-		tx.MustExec("UPDATE " + user + " SET day_of_week=? WHERE id='" + id + "'", meet.Day.String)
-		tx.MustExec("UPDATE " + user + " SET meet_date=? WHERE id='" + id + "'", nil)
+		tx.MustExec("UPDATE "+user+" SET day_of_week=? WHERE id='"+id+"'", meet.Day.String)
+		tx.MustExec("UPDATE "+user+" SET meet_date=? WHERE id='"+id+"'", nil)
 	}
 	if meet.Date.Valid == true {
-		tx.MustExec("UPDATE " + user + " SET meet_date=? WHERE id='" + id + "'", meet.Date.String)
-		tx.MustExec("UPDATE " + user + " SET day_of_week=? WHERE id='" + id + "'", nil)
+		tx.MustExec("UPDATE "+user+" SET meet_date=? WHERE id='"+id+"'", meet.Date.String)
+		tx.MustExec("UPDATE "+user+" SET day_of_week=? WHERE id='"+id+"'", nil)
 	}
-	tx.MustExec("UPDATE " + user + " SET start_time=? WHERE id='" + id + "'", meet.STime)
-	tx.MustExec("UPDATE " + user + " SET end_time=? WHERE id='" + id + "'", meet.ETime)
-	tx.MustExec("UPDATE " + user + " SET weekly=? WHERE id='" + id + "'", meet.Weekly)
+	tx.MustExec("UPDATE "+user+" SET start_time=? WHERE id='"+id+"'", meet.STime)
+	tx.MustExec("UPDATE "+user+" SET end_time=? WHERE id='"+id+"'", meet.ETime)
+	tx.MustExec("UPDATE "+user+" SET weekly=? WHERE id='"+id+"'", meet.Weekly)
 	err := tx.Commit()
 	if err != nil {
 		log.Fatalln("UpdateMeet:", err)
@@ -189,7 +206,7 @@ func DeleteMeet(user string, meetName string) {
 		}
 	}(db)
 
-	_, err := db.Queryx("DELETE FROM " + user + " WHERE meet_name=? LIMIT 1", meetName)
+	_, err := db.Queryx("DELETE FROM "+user+" WHERE meet_name=? LIMIT 1", meetName)
 	if err != nil {
 		log.Fatalln("DeleteMeet:", err)
 	}
